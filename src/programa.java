@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.InputMismatchException;
 
 class Funcionario {
     private String nome;
@@ -66,14 +67,14 @@ class Funcionario {
 
 class Terceirizado extends Funcionario {
 
+    private String empresa;
+    private String tipo_trabalho;
+
     public Terceirizado (String empresa, String tipo_trabalho, String nome, String cargo, int idade, double salario, String departamento, int id) {
         super (nome, cargo, idade, salario, departamento, id);
         this.empresa = empresa;
         this.tipo_trabalho = tipo_trabalho;
     }
-
-    private String empresa;
-    private String tipo_trabalho;
 
     public String getEmpresa() {
         return empresa;
@@ -92,57 +93,66 @@ class Terceirizado extends Funcionario {
     }
 }
 
-
-
 public class programa {
     private static List<Funcionario> funcionarios = new ArrayList<>();
+    private static List<Terceirizado> terceirizados = new ArrayList<>();
     
     public static void main(String[] args) {
         cadastrarFuncionariosAutomaticamente();
-        
+        cadastrarFuncionariosAutomaticamente2();
+
+        int opcao = -1;
         Scanner scanner = new Scanner(System.in);
-        int opcao;
 
-        do {
+        while (opcao != 7) {
             exibirMenu();
-            opcao = scanner.nextInt();
-            scanner.nextLine(); 
+            try {
+                opcao = scanner.nextInt();
+                scanner.nextLine();
 
-            switch (opcao) {
-                case 1:
-                    cadastrarFuncionario();
-                    break;
-                case 2:
-                    listarFuncionarios();
-                    break;
-                case 3:
-                    buscarFuncionario();
-                    break;
-                case 4:
-                    editarFuncionario();
-                    break;
-                case 5:
-                    excluirFuncionario();
-                    break;
-                case 6:
-                    System.out.println("Saindo do programa...");
-                    break;
-                default:
-                    System.out.println("Opção inválida. Tente novamente.");
-                    break;
+                switch (opcao) {
+                    case 1:
+                        cadastrarFuncionario();
+                        break;
+                    case 2:
+                        listarFuncionarios();
+                        break;
+                    case 3:
+                        listarFuncionariosTerceirizados();
+                        break;
+                    case 4:
+                        buscarFuncionario();
+                        break;
+                    case 5:
+                        editarFuncionario();
+                        break;
+                    case 6:
+                        excluirFuncionario();
+                        break;
+                    case 7:
+                        System.out.println("Saindo do programa...");
+                        break;
+                    default:
+                        System.out.println("Opção inválida. Tente novamente.");
+                        break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Opção inválida. Tente novamente.");
+                scanner.nextLine();
             }
-        } while (opcao != 6);
-        
+        }
+        scanner.close();
     }
     
     private static void exibirMenu() {
         System.out.println("\n==== MENU ====");
         System.out.println("1. Cadastrar funcionário");
         System.out.println("2. Listar funcionários");
-        System.out.println("3. Buscar funcionário");
-        System.out.println("4. Editar funcionário");
-        System.out.println("5. Excluir funcionario");
-        System.out.println("6. Sair");
+        System.out.println("3. Listar funcionários Terceirizados");
+        System.out.println("4. Buscar funcionário");
+        System.out.println("5. Editar funcionário");
+        System.out.println("6. Excluir funcionario");
+        System.out.println("7. Sair");
         System.out.print("   Escolha uma opção: ");
         
 
@@ -158,6 +168,12 @@ public class programa {
         funcionarios.add(new Funcionario("Lucas", "Programador", 27, 4500.0, "TI", gerarIDAutomatico()));
         
     }
+
+    private static void cadastrarFuncionariosAutomaticamente2() {
+    terceirizados.add(new Terceirizado("Empresa X", "remoto", "Sergio", "Analista", 30, 1000.0, "TI", gerarIDAutomatico()));
+    terceirizados.add(new Terceirizado("Empresa Y", "presencial", "Robson", "Desenvolvedor", 25, 2000.0, "Marketing", gerarIDAutomatico()));
+}
+
    
     private static void cadastrarFuncionario() {
         Scanner scanner = new Scanner(System.in);
@@ -205,9 +221,24 @@ public class programa {
         String departamento = scanner.nextLine();
     
         int id = gerarIDAutomatico();
-    
+
+        System.out.print("O funcionário é terceirizado? (S/N): ");
+    String terceirizadoStr = scanner.nextLine();
+    boolean terceirizado = terceirizadoStr.equalsIgnoreCase("S");
+
+    if (terceirizado) {
+        System.out.print("Digite o nome da empresa: ");
+        String empresa = scanner.nextLine();
+
+        System.out.print("Digite o tipo de trabalho: ");
+        String tipoTrabalho = scanner.nextLine();
+
+        Terceirizado novoTerceirizado = new Terceirizado(empresa, tipoTrabalho, nome, cargo, idade, salario, departamento, id);
+        terceirizados.add(novoTerceirizado);
+    } else {
         Funcionario novoFuncionario = new Funcionario(nome, cargo, idade, salario, departamento, id);
         funcionarios.add(novoFuncionario);
+    }
     
         System.out.println("Funcionário cadastrado com sucesso!\n");
     }
@@ -229,7 +260,14 @@ public class programa {
             System.out.printf("%-15s %-15s %-15s\n", funcionario.getNome(), funcionario.getCargo(), funcionario.getIdade());
         }
         System.out.println();
-        
+    }
+    private static void listarFuncionariosTerceirizados() {
+        System.out.println("\n==== LISTA DE FUNCIONÁRIOS TERCEIRIZADOS ====");
+        System.out.printf("%-15s %-15s %-15s\n", "Nome", "Cargo", "Idade");
+        for (Terceirizado terceirizado : terceirizados) {
+            System.out.printf("%-15s %-15s %-15s\n", terceirizado.getNome(), terceirizado.getCargo(), terceirizado.getIdade());
+        }
+        System.out.println();
     }
 
     private static void buscarFuncionario() {
@@ -262,6 +300,27 @@ public class programa {
                 encontrouFuncionarios = true;
             } else if (atributo.equalsIgnoreCase("id") && String.valueOf(funcionario.getID()).equalsIgnoreCase(valor)){
                 exibirDetalhesFuncionario(funcionario);
+                encontrouFuncionarios = true;
+            }
+        }
+        for (Terceirizado terceirizado : terceirizados) {
+            if (atributo.equalsIgnoreCase("nome") && terceirizado.getNome().equalsIgnoreCase(valor)) {
+                exibirDetalhesFuncionario(terceirizado);
+                encontrouFuncionarios = true;
+            } else if (atributo.equalsIgnoreCase("cargo") && terceirizado.getCargo().equalsIgnoreCase(valor)) {
+                exibirDetalhesFuncionario(terceirizado);
+                encontrouFuncionarios = true;
+            } else if (atributo.equalsIgnoreCase("idade") && String.valueOf(terceirizado.getIdade()).equalsIgnoreCase(valor)) {
+                exibirDetalhesFuncionario(terceirizado);
+                encontrouFuncionarios = true;
+            } else if (atributo.equalsIgnoreCase("salário") && String.valueOf(terceirizado.getSalario()).equalsIgnoreCase(valor)) {
+                exibirDetalhesFuncionario(terceirizado);
+                encontrouFuncionarios = true;
+            } else if (atributo.equalsIgnoreCase("departamento") && terceirizado.getDepartamento().equalsIgnoreCase(valor)) {
+                exibirDetalhesFuncionario(terceirizado);
+                encontrouFuncionarios = true;
+            } else if (atributo.equalsIgnoreCase("id") && String.valueOf(terceirizado.getID()).equalsIgnoreCase(valor)){
+                exibirDetalhesFuncionario(terceirizado);
                 encontrouFuncionarios = true;
             }
         }
@@ -328,6 +387,56 @@ public class programa {
                 break;
             }
         }
+
+        for (Terceirizado terceirizado : terceirizados) {
+            if (terceirizado.getID() == id) {
+                System.out.println("Funcionário terceirizado encontrado! Digite as novas informações:");
+    
+                System.out.print("Digite o novo cargo do funcionário terceirizado: ");
+                String novoCargo = scanner.nextLine();
+                terceirizado.setCargo(novoCargo);
+    
+                int novaIdade;
+                do {
+                    System.out.print("Digite a nova idade do funcionário terceirizado (apenas números positivos): ");
+                    while (!scanner.hasNextInt()) {
+                        System.out.println("Entrada inválida. A idade deve ser um número inteiro. Tente novamente.");
+                        scanner.nextLine(); 
+                    }
+                    novaIdade = scanner.nextInt();
+                    scanner.nextLine(); 
+                } while (novaIdade <= 0);
+                terceirizado.setIdade(novaIdade);
+    
+                double novoSalario;
+                do {
+                    System.out.print("Digite o novo salário do funcionário terceirizado (apenas números positivos): ");
+                    while (!scanner.hasNextDouble()) {
+                        System.out.println("Entrada inválida. O salário deve ser um número decimal. Tente novamente.");
+                        scanner.nextLine(); 
+                    }
+                    novoSalario = scanner.nextDouble();
+                    scanner.nextLine(); 
+                } while (novoSalario <= 0);
+                terceirizado.setSalario(novoSalario);
+
+                System.out.print("Digite o novo departamento do funcionário: ");
+                String novoDepartamento = scanner.nextLine();
+                terceirizado.setDepartamento(novoDepartamento);
+
+                System.out.print("Digite a novo tipo de trabalho do funcionário terceirizado: ");
+                String novoTipo_trabalho = scanner.nextLine();
+                terceirizado.setEmpresa(novoTipo_trabalho);
+    
+                System.out.print("Digite a nova empresa do funcionário terceirizado: ");
+                String novaEmpresa = scanner.nextLine();
+                terceirizado.setEmpresa(novaEmpresa);
+    
+                System.out.println("Informações do funcionário terceirizado atualizadas com sucesso!\n");
+                funcionarioEncontrado = true;
+                break;
+            }
+        }
     
         if (!funcionarioEncontrado) {
             System.out.println("Nenhum funcionário encontrado com o ID especificado.\n");
@@ -342,10 +451,10 @@ public class programa {
             System.out.print("\nDigite o ID do funcionário que deseja excluir (apenas números positivos): ");
             while (!scanner.hasNextInt()) {
                 System.out.println("Entrada inválida. O ID deve ser um número inteiro. Tente novamente.");
-                scanner.nextLine(); 
+                scanner.nextLine();
             }
             id = scanner.nextInt();
-            scanner.nextLine(); 
+            scanner.nextLine();
         } while (id <= 0);
     
         boolean funcionarioEncontrado = false;
@@ -359,28 +468,63 @@ public class programa {
             }
         }
     
-        if (funcionarioEncontrado) {
-            funcionarios.remove(funcionarioRemovido);
-    
-            for (int i = 0; i < funcionarios.size(); i++) {
-                Funcionario funcionario = funcionarios.get(i);
-                funcionario.setID(i + 1);
+        for (Terceirizado terceirizado : terceirizados) {
+            if (terceirizado.getID() == id) {
+                funcionarioEncontrado = true;
+                System.out.print("Deseja realmente remover o funcionário (S/N)? ");
+                String confirmacao = scanner.nextLine();
+                if (confirmacao.equalsIgnoreCase("S")) {
+                    terceirizados.remove(terceirizado);
+                    System.out.println("Funcionário removido com sucesso!\n");
+                } else {
+                    System.out.println("Remoção cancelada.\n");
+                }
+                break;
             }
+        }
     
-            System.out.println("Funcionário removido com sucesso!\n");
+        if (funcionarioEncontrado && funcionarioRemovido != null) {
+            System.out.print("Deseja realmente remover o funcionário (S/N)? ");
+            String confirmacao = scanner.nextLine();
+            if (confirmacao.equalsIgnoreCase("S")) {
+                funcionarios.remove(funcionarioRemovido);
+    
+                for (int i = 0; i < funcionarios.size(); i++) {
+                    Funcionario funcionario = funcionarios.get(i);
+                    funcionario.setID(i + 1);
+                }
+    
+                System.out.println("Funcionário removido com sucesso!\n");
+            } else {
+                System.out.println("Remoção cancelada.\n");
+            }
         } else {
             System.out.println("Nenhum funcionário encontrado com o ID especificado.\n");
         }
     }
     
+    
    
     private static void exibirDetalhesFuncionario(Funcionario funcionario) {
-        System.out.println("ID: " + funcionario.getID());
-        System.out.println("Nome: " + funcionario.getNome());
-        System.out.println("Cargo: " + funcionario.getCargo());
-        System.out.println("Idade: " + funcionario.getIdade());
-        System.out.println("Salário: " + funcionario.getSalario());
-        System.out.println("Departamento: " + funcionario.getDepartamento() + "\n");
-       
+        if (funcionario instanceof Terceirizado) {
+            Terceirizado terceirizado = (Terceirizado) funcionario;
+            System.out.println("\n*FUNCIONARIO TERCEIRIZADO*" );
+            System.out.println("ID: " + terceirizado.getID());
+            System.out.println("Nome: " + terceirizado.getNome());
+            System.out.println("Cargo: " + terceirizado.getCargo());
+            System.out.println("Idade: " + terceirizado.getIdade());
+            System.out.println("Salário: " + terceirizado.getSalario());
+            System.out.println("Departamento: " + terceirizado.getDepartamento());
+            System.out.println("Tipo de Trabalho: " + terceirizado.getTipo_trabalho());
+            System.out.println("Empresa: " + terceirizado.getEmpresa() + "\n");
+        } else {
+            System.out.println("ID: " + funcionario.getID());
+            System.out.println("Nome: " + funcionario.getNome());
+            System.out.println("Cargo: " + funcionario.getCargo());
+            System.out.println("Idade: " + funcionario.getIdade());
+            System.out.println("Salário: " + funcionario.getSalario());
+            System.out.println("Departamento: " + funcionario.getDepartamento() + "\n");
+        }
     }
 }
+    
